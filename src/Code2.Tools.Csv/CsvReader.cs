@@ -1,4 +1,7 @@
-﻿using System.Text;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
 using Code2.Tools.Csv.Internals;
 
 namespace Code2.Tools.Csv

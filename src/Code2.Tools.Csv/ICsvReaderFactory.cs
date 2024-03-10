@@ -1,4 +1,6 @@
-﻿namespace Code2.Tools.Csv
+﻿using System.IO;
+
+namespace Code2.Tools.Csv
 {
 	public interface ICsvReaderFactory
 	{

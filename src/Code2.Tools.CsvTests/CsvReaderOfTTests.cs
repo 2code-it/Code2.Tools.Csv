@@ -1,5 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Code2.Tools.Csv.Tests.Assets;
+using System.IO;
+using System;
 
 namespace Code2.Tools.Csv.Tests
 {

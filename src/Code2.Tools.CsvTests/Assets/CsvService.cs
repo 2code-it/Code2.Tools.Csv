@@ -1,4 +1,6 @@
-﻿using System.Reflection;
+﻿using System.Collections.Generic;
+using System.IO;
+using System.Reflection;
 
 namespace Code2.Tools.Csv.Tests.Assets
 {

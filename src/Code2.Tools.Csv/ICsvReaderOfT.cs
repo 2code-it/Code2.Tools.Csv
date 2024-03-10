@@ -1,4 +1,6 @@
-﻿namespace Code2.Tools.Csv
+﻿using System;
+
+namespace Code2.Tools.Csv
 {
 	public interface ICsvReader<T> : ICsvReader
 	{
