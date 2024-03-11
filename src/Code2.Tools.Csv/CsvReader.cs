@@ -23,11 +23,13 @@ namespace Code2.Tools.Csv
 		private readonly CsvReaderOptions _options;
 
 
-		private List<string> _line = new List<string>();
-		private StringBuilder _cell = new StringBuilder();
+		private readonly List<string> _line = new List<string>();
+		private readonly StringBuilder _cell = new StringBuilder();
+		private readonly bool _disposeReader;
+
 		private int _currentChar;
 		private bool _isQuoteOpen;
-		private bool _disposeReader;
+		
 
 		public int CurrentLineNumber { get; private set; }
 		public bool EndOfStream { get; private set; }
@@ -39,7 +41,7 @@ namespace Code2.Tools.Csv
 			List<string[]> lines = new List<string[]>();
 			while (!EndOfStream)
 			{
-				string[]? line = ReadLine();
+				string[] line = ReadLine();
 				if (line is null) continue;
 				lines.Add(line);
 				if (lines.Count == amount) break;
@@ -47,7 +49,7 @@ namespace Code2.Tools.Csv
 			return lines.ToArray();
 		}
 
-		public string[]? ReadLine()
+		public string[] ReadLine()
 		{
 			CurrentLineNumber++;
 
@@ -95,7 +97,7 @@ namespace Code2.Tools.Csv
 			}
 
 			EndOfStream = _reader.Peek() == -1;
-			if (Options.Explicit && Options.Header is not null && Options.Header.Length != _line.Count)
+			if (Options.Explicit && Options.Header != null && Options.Header.Length != _line.Count)
 			{
 				throw new InvalidOperationException($"Header mismatch line: {CurrentLineNumber}");
 			}

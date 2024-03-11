@@ -19,13 +19,14 @@ namespace Code2.Tools.Csv.Tests
 				"#next line",
 				"2,first1,last2,10",
 			};
-			using StreamReader reader = _csvService.GetStreamReader(lines);
-			CsvReader<TestItem> csvReader = new CsvReader<TestItem>(reader);
+			using (StreamReader reader = _csvService.GetStreamReader(lines))
+			{
+				CsvReader<TestItem> csvReader = new CsvReader<TestItem>(reader);
+				var items = csvReader.ReadObjects(10);
 
-			var items = csvReader.ReadObjects(10);
-
-			Assert.AreEqual(2, items.Length);
-			Assert.AreEqual(3, csvReader.CurrentLineNumber);
+				Assert.AreEqual(2, items.Length);
+				Assert.AreEqual(3, csvReader.CurrentLineNumber);
+			}
 		}
 
 		[TestMethod, ExpectedException(typeof(AggregateException))]
@@ -36,10 +37,11 @@ namespace Code2.Tools.Csv.Tests
 				"first1,last0,20,1",
 				"first1,last2,10,2",
 			};
-			using StreamReader reader = _csvService.GetStreamReader(lines);
-			CsvReader<TestItem> csvReader = new CsvReader<TestItem>(reader);
-
-			var items = csvReader.ReadObjects(10);
+			using (StreamReader reader = _csvService.GetStreamReader(lines))
+			{
+				CsvReader<TestItem> csvReader = new CsvReader<TestItem>(reader);
+				var items = csvReader.ReadObjects(10);
+			}
 		}
 
 		[TestMethod]
@@ -50,13 +52,15 @@ namespace Code2.Tools.Csv.Tests
 				"first1,last0,20,1",
 				"first1,last2,10,2",
 			};
-			using StreamReader reader = _csvService.GetStreamReader(lines);
-			CsvReader<TestItem> csvReader = new CsvReader<TestItem>(reader);
-			csvReader.Options.Header = new[] { "Firstname", "Lastname", "Total", "Id" };
+			using (StreamReader reader = _csvService.GetStreamReader(lines))
+			{
+				CsvReader<TestItem> csvReader = new CsvReader<TestItem>(reader);
+				csvReader.Options.Header = new[] { "Firstname", "Lastname", "Total", "Id" };
 
-			var items = csvReader.ReadObjects(10);
+				var items = csvReader.ReadObjects(10);
 
-			Assert.AreEqual(2, items.Length);
+				Assert.AreEqual(2, items.Length);
+			}
 		}
 
 		[TestMethod]
@@ -67,22 +71,24 @@ namespace Code2.Tools.Csv.Tests
 				"1,first1,last0,20",
 				"2,first1,last2,10",
 			};
-			using StreamReader reader = _csvService.GetStreamReader(lines);
-			CsvReader<TestItem> csvReader = new CsvReader<TestItem>(reader);
-			csvReader.Deserializer = (line, lineNumber) =>
+			using (StreamReader reader = _csvService.GetStreamReader(lines))
 			{
-				TestItem item = new TestItem();
-				item.Id = Convert.ToInt32(line[0]);
-				item.Firstname = line[1];
-				item.Lastname = line[2];
-				item.Total = Convert.ToInt32(line[3]);
-				return item;
-			};
+				CsvReader<TestItem> csvReader = new CsvReader<TestItem>(reader);
+				csvReader.Deserializer = (line, lineNumber) =>
+				{
+					TestItem item = new TestItem();
+					item.Id = Convert.ToInt32(line[0]);
+					item.Firstname = line[1];
+					item.Lastname = line[2];
+					item.Total = Convert.ToInt32(line[3]);
+					return item;
+				};
 
-			var items = csvReader.ReadObjects(10);
+				var items = csvReader.ReadObjects(10);
 
-			Assert.AreEqual(2, items.Length);
-			Assert.AreEqual(1, items[0].Id);
+				Assert.AreEqual(2, items.Length);
+				Assert.AreEqual(1, items[0].Id);
+			}
 		}
 	}
 }

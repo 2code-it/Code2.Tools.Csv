@@ -7,7 +7,8 @@ using Code2.Tools.Csv.Internals;
 namespace Code2.Tools.Csv
 {
     public class CsvReader<T> : CsvReader, ICsvReader<T>
-	{		
+		where T : class, new()
+	{
 		public CsvReader(string filePath) : this(filePath, new CsvReaderOptions(), new FileSystem()) { }
 		public CsvReader(string filePath, CsvReaderOptions options) : this(filePath, options, new FileSystem()) { }
 		internal CsvReader(string filePath, CsvReaderOptions options, IFileSystem fileSystem) : this(fileSystem.FileOpenText(filePath), options, disposeReader: true) { }
@@ -17,7 +18,7 @@ namespace Code2.Tools.Csv
 			Deserializer = DefaultDeserializer;
 		}
 
-		private PropertyInfo?[]? _properties;
+		private PropertyInfo[] _properties;
 
 		public Func<string[], int, T> Deserializer { get; set; }
 
@@ -28,22 +29,22 @@ namespace Code2.Tools.Csv
 			return lines.AsParallel().AsOrdered().Select((x, i) => Deserializer(x, start + i)).ToArray();
 		}
 
-		public T? ReadObject()
+		public T ReadObject()
 		{
-			string[]? line = ReadLine();
+			string[] line = ReadLine();
 			if (line is null) return default;
 			return Deserializer(line, CurrentLineNumber);
 		}
 
 		protected virtual T DefaultDeserializer(string[] line, int lineNumber)
 		{
-			PropertyInfo?[] properties = GetProperties();
+			PropertyInfo[] properties = GetProperties();
 
-			T newObject = Activator.CreateInstance<T>()!; ;
+			T newObject = Activator.CreateInstance<T>();
 			for (int i = 0; i < properties.Length && i < line.Length; i++)
 			{
 				if (properties[i] is null || string.IsNullOrEmpty(line[i])) continue;
-				TrySetValue(properties[i]!, line[i]!, newObject, lineNumber);
+				TrySetValue(properties[i], line[i], newObject, lineNumber);
 			}
 			return newObject;
 		}
@@ -52,7 +53,7 @@ namespace Code2.Tools.Csv
 		{
 			try
 			{
-				object? value = property.PropertyType == typeof(string) ? cellValue : Convert.ChangeType(cellValue, property.PropertyType);
+				object value = property.PropertyType == typeof(string) ? cellValue : Convert.ChangeType(cellValue, property.PropertyType);
 				property.SetValue(instance, value);
 			}
 			catch (Exception ex)
@@ -61,7 +62,7 @@ namespace Code2.Tools.Csv
 			}
 		}
 
-		private PropertyInfo?[] GetProperties()
+		private PropertyInfo[] GetProperties()
 		{
 			if (_properties is null)
 			{

@@ -6,7 +6,7 @@
 		bool EndOfStream { get; }
 		CsvReaderOptions Options { get; }
 
-		string[]? ReadLine();
+		string[] ReadLine();
 		string[][] ReadLines(int amount = 1000);
 	}
 }
