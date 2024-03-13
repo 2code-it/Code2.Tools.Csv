@@ -13,6 +13,7 @@
 		<Description>CSV reader / deserializer</Description>
 		<Title>$(AssemblyName)</Title>
 		<PackageLicenseExpression>BSD-2-Clause</PackageLicenseExpression>
+		<AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
 	</PropertyGroup>
 	<ItemGroup>
 		<None Include="..\..\README.md">
