@@ -1,12 +1,13 @@
-﻿using System;
+﻿using Code2.Tools.Csv.Internals;
+using System;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using Code2.Tools.Csv.Internals;
 
 namespace Code2.Tools.Csv
 {
-    public class CsvReader<T> : CsvReader, ICsvReader<T>
+	public class CsvReader<T> : CsvReader, ICsvReader<T>
 		where T : class, new()
 	{
 		public CsvReader(string filePath) : this(filePath, new CsvReaderOptions(), new FileSystem()) { }
@@ -18,51 +19,84 @@ namespace Code2.Tools.Csv
 			Deserializer = DefaultDeserializer;
 		}
 
-		private PropertyInfo[] _properties;
+		private PropertyInfo?[]? _properties;
 
 		public Func<string[], int, T> Deserializer { get; set; }
 
 		public T[] ReadObjects(int amount)
 		{
-			int start = CurrentLineNumber+1;
+			int start = CurrentLineNumber + 1;
 			string[][] lines = ReadLines(amount);
 			return lines.AsParallel().AsOrdered().Select((x, i) => Deserializer(x, start + i)).ToArray();
 		}
 
 		public T ReadObject()
 		{
-			string[] line = ReadLine();
-			if (line is null) return default;
+			string[]? line = ReadLine();
+			if (line is null) return default!;
 			return Deserializer(line, CurrentLineNumber);
 		}
 
 		protected virtual T DefaultDeserializer(string[] line, int lineNumber)
 		{
-			PropertyInfo[] properties = GetProperties();
+			PropertyInfo?[] properties = GetProperties();
 
 			T newObject = Activator.CreateInstance<T>();
 			for (int i = 0; i < properties.Length && i < line.Length; i++)
 			{
-				if (properties[i] is null || string.IsNullOrEmpty(line[i])) continue;
-				TrySetValue(properties[i], line[i], newObject, lineNumber);
+				if (properties[i] is null) continue;
+				SetValueOrThrow(properties[i]!, line[i], newObject, lineNumber);
 			}
 			return newObject;
 		}
 
-		private void TrySetValue(PropertyInfo property, string cellValue, object instance, int lineNumber)
+		private void SetValueOrThrow(PropertyInfo property, string cellValue, object instance, int lineNumber)
 		{
-			try
+			Type type = property.PropertyType;
+			Type? innerType = Nullable.GetUnderlyingType(type);
+			bool isNullable = innerType is not null;
+			type = innerType ?? type;
+			object? value = null;
+			string? errorMessage = null;
+
+			if (!(isNullable && cellValue == string.Empty))
 			{
-				object value = property.PropertyType == typeof(string) ? cellValue : Convert.ChangeType(cellValue, property.PropertyType);
-				property.SetValue(instance, value);
+				if (type == typeof(string))
+				{
+					value = cellValue;
+				}
+				else if (type == typeof(DateTime) && Options.DateFormat is not null)
+				{
+					if (DateTime.TryParseExact(cellValue, Options.DateFormat, CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime dateTime))
+					{
+						value = dateTime;
+					}
+					else
+					{
+						errorMessage = "Failed to parse datetime";
+					}
+				}
+				else
+				{
+					try
+					{
+						value = Convert.ChangeType(cellValue, property.PropertyType);
+					}
+					catch (Exception ex)
+					{
+						errorMessage = ex.Message;
+					}
+				}
 			}
-			catch (Exception ex)
+			if (errorMessage is not null)
 			{
-				throw new InvalidOperationException($"Error setting value for {property.Name}, csv line number {lineNumber}, reason: {ex.Message}");
+				throw new InvalidOperationException($"Error setting value for {property.Name}, csv line number {lineNumber}, reason:{errorMessage}");
 			}
+
+			property.SetValue(instance, value);
 		}
 
-		private PropertyInfo[] GetProperties()
+		private PropertyInfo?[] GetProperties()
 		{
 			if (_properties is null)
 			{
