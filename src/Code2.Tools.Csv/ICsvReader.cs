@@ -1,6 +1,8 @@
-﻿namespace Code2.Tools.Csv
+﻿using System;
+
+namespace Code2.Tools.Csv
 {
-	public interface ICsvReader
+	public interface ICsvReader: IDisposable
 	{
 		int CurrentLineNumber { get; }
 		bool EndOfStream { get; }

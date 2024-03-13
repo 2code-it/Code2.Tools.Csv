@@ -6,7 +6,7 @@ using Code2.Tools.Csv.Internals;
 
 namespace Code2.Tools.Csv
 {
-    public class CsvReader : ICsvReader, IDisposable
+    public class CsvReader : ICsvReader
 	{
 		public CsvReader(string filePath) : this(filePath, new CsvReaderOptions(), new FileSystem()) { }
 		public CsvReader(string filePath, CsvReaderOptions options) : this(filePath, options, new FileSystem()) { }
