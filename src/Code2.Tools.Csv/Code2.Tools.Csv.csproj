@@ -3,8 +3,7 @@
 	<PropertyGroup>
 		<TargetFrameworks>netstandard2.0;net6.0;net8.0</TargetFrameworks>
 		<ImplicitUsings>false</ImplicitUsings>
-		<Nullable>disable</Nullable>
-		<IncludeSymbols>true</IncludeSymbols>
+		<Nullable>enable</Nullable>
 		<Authors>2code</Authors>
 		<PackageProjectUrl>https://github.com/2code-it/Code2.Tools.Csv</PackageProjectUrl>
 		<PackageTags>csv reader deserializer rfc4180</PackageTags>
@@ -14,6 +13,7 @@
 		<Title>$(AssemblyName)</Title>
 		<PackageLicenseExpression>BSD-2-Clause</PackageLicenseExpression>
 		<AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+		<LangVersion>9.0</LangVersion>
 	</PropertyGroup>
 	<ItemGroup>
 		<None Include="..\..\README.md">

@@ -1,16 +1,16 @@
-﻿using System;
+﻿using Code2.Tools.Csv.Internals;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using Code2.Tools.Csv.Internals;
 
 namespace Code2.Tools.Csv
 {
-    public class CsvReader : ICsvReader
+	public class CsvReader : ICsvReader
 	{
 		public CsvReader(string filePath) : this(filePath, new CsvReaderOptions(), new FileSystem()) { }
 		public CsvReader(string filePath, CsvReaderOptions options) : this(filePath, options, new FileSystem()) { }
-		internal CsvReader(string filePath, CsvReaderOptions options, IFileSystem fileSystem): this(fileSystem.FileOpenText(filePath), options, true){ }
+		internal CsvReader(string filePath, CsvReaderOptions options, IFileSystem fileSystem) : this(fileSystem.FileOpenText(filePath), options, true) { }
 		public CsvReader(TextReader reader) : this(reader, new CsvReaderOptions()) { }
 		public CsvReader(TextReader reader, CsvReaderOptions options, bool disposeReader = false)
 		{
@@ -29,7 +29,7 @@ namespace Code2.Tools.Csv
 
 		private int _currentChar;
 		private bool _isQuoteOpen;
-		
+
 
 		public int CurrentLineNumber { get; private set; }
 		public bool EndOfStream { get; private set; }
@@ -41,7 +41,7 @@ namespace Code2.Tools.Csv
 			List<string[]> lines = new List<string[]>();
 			while (!EndOfStream)
 			{
-				string[] line = ReadLine();
+				string[]? line = ReadLine();
 				if (line is null) continue;
 				lines.Add(line);
 				if (lines.Count == amount) break;
@@ -49,7 +49,7 @@ namespace Code2.Tools.Csv
 			return lines.ToArray();
 		}
 
-		public string[] ReadLine()
+		public string[]? ReadLine()
 		{
 			CurrentLineNumber++;
 
@@ -104,6 +104,7 @@ namespace Code2.Tools.Csv
 			return _line.Count == 0 ? null : _line.ToArray();
 		}
 
+		[System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA1816:Dispose methods should call SuppressFinalize", Justification = "Cascade call to reader")]
 		public void Dispose()
 		{
 			if (_disposeReader)

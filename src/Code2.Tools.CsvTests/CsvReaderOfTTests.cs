@@ -1,15 +1,13 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Code2.Tools.Csv.Tests.Assets;
-using System.IO;
+﻿using Code2.Tools.CsvTests;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.IO;
 
 namespace Code2.Tools.Csv.Tests
 {
 	[TestClass]
 	public class CsvReaderOfTTests
 	{
-		private readonly CsvService _csvService = new CsvService();
-
 		[TestMethod]
 		public void ReadObject_When_CommentLine_Expect_LineSkipped()
 		{
@@ -19,14 +17,13 @@ namespace Code2.Tools.Csv.Tests
 				"#next line",
 				"2,first1,last2,10",
 			};
-			using (StreamReader reader = _csvService.GetStreamReader(lines))
-			{
-				CsvReader<TestItem> csvReader = new CsvReader<TestItem>(reader);
-				var items = csvReader.ReadObjects(10);
+			using StreamReader reader = CsvUtil.GetReaderFromLines(lines);
+			CsvReader<TestItem> csvReader = new CsvReader<TestItem>(reader);
+			var items = csvReader.ReadObjects(10);
 
-				Assert.AreEqual(2, items.Length);
-				Assert.AreEqual(3, csvReader.CurrentLineNumber);
-			}
+			Assert.AreEqual(2, items.Length);
+			Assert.AreEqual(3, csvReader.CurrentLineNumber);
+
 		}
 
 		[TestMethod, ExpectedException(typeof(AggregateException))]
@@ -37,11 +34,10 @@ namespace Code2.Tools.Csv.Tests
 				"first1,last0,20,1",
 				"first1,last2,10,2",
 			};
-			using (StreamReader reader = _csvService.GetStreamReader(lines))
-			{
-				CsvReader<TestItem> csvReader = new CsvReader<TestItem>(reader);
-				var items = csvReader.ReadObjects(10);
-			}
+			using StreamReader reader = CsvUtil.GetReaderFromLines(lines);
+			CsvReader<TestItem> csvReader = new CsvReader<TestItem>(reader);
+
+			var items = csvReader.ReadObjects(10);
 		}
 
 		[TestMethod]
@@ -52,15 +48,13 @@ namespace Code2.Tools.Csv.Tests
 				"first1,last0,20,1",
 				"first1,last2,10,2",
 			};
-			using (StreamReader reader = _csvService.GetStreamReader(lines))
-			{
-				CsvReader<TestItem> csvReader = new CsvReader<TestItem>(reader);
-				csvReader.Options.Header = new[] { "Firstname", "Lastname", "Total", "Id" };
+			using StreamReader reader = CsvUtil.GetReaderFromLines(lines);
+			CsvReader<TestItem> csvReader = new CsvReader<TestItem>(reader);
+			csvReader.Options.Header = new[] { "Firstname", "Lastname", "Total", "Id" };
 
-				var items = csvReader.ReadObjects(10);
+			var items = csvReader.ReadObjects(10);
 
-				Assert.AreEqual(2, items.Length);
-			}
+			Assert.AreEqual(2, items.Length);
 		}
 
 		[TestMethod]
@@ -71,24 +65,68 @@ namespace Code2.Tools.Csv.Tests
 				"1,first1,last0,20",
 				"2,first1,last2,10",
 			};
-			using (StreamReader reader = _csvService.GetStreamReader(lines))
+			using StreamReader reader = CsvUtil.GetReaderFromLines(lines);
+			CsvReader<TestItem> csvReader = new CsvReader<TestItem>(reader);
+			csvReader.Deserializer = (line, lineNumber) =>
 			{
-				CsvReader<TestItem> csvReader = new CsvReader<TestItem>(reader);
-				csvReader.Deserializer = (line, lineNumber) =>
-				{
-					TestItem item = new TestItem();
-					item.Id = Convert.ToInt32(line[0]);
-					item.Firstname = line[1];
-					item.Lastname = line[2];
-					item.Total = Convert.ToInt32(line[3]);
-					return item;
-				};
+				TestItem item = new TestItem();
+				item.Id = Convert.ToInt32(line[0]);
+				item.Firstname = line[1];
+				item.Lastname = line[2];
+				item.Total = Convert.ToInt32(line[3]);
+				return item;
+			};
 
-				var items = csvReader.ReadObjects(10);
+			var items = csvReader.ReadObjects(10);
 
-				Assert.AreEqual(2, items.Length);
-				Assert.AreEqual(1, items[0].Id);
-			}
+			Assert.AreEqual(2, items.Length);
+			Assert.AreEqual(1, items[0].Id);
+		}
+
+		[TestMethod]
+		public void ReadObject_When_UsingMatchingDateFormat_Expect_DeserializationSuccess()
+		{
+			string[] lines = new[]
+			{
+				"1,first1,last0,20,20010101T00:00:00",
+				"2,first1,last2,10,20000102T23:00:00",
+			};
+			using StreamReader reader = CsvUtil.GetReaderFromLines(lines);
+			CsvReaderOptions options = new CsvReaderOptions { DateFormat = "yyyyMMddTHH:mm:ss" };
+			CsvReader<TestItem> csvReader = new CsvReader<TestItem>(reader, options);
+
+			var items = csvReader.ReadObjects(10);
+
+			Assert.AreEqual(2, items.Length);
+			Assert.AreEqual(1, items[0].Id);
+		}
+
+		[TestMethod]
+		[ExpectedException(typeof(AggregateException))]
+		public void ReadObject_When_UsingNonMatchingDateFormat_Expect_DeserializationException()
+		{
+			string[] lines = new[]
+			{
+				"1,first1,last0,20,20010101T00:00:00",
+				"2,first1,last2,10,20000102T23:00:00",
+			};
+			using StreamReader reader = CsvUtil.GetReaderFromLines(lines);
+			CsvReaderOptions options = new CsvReaderOptions { DateFormat = "yyyyMMdd HH:mm:ss" };
+			CsvReader<TestItem> csvReader = new CsvReader<TestItem>(reader, options);
+
+			var items = csvReader.ReadObjects(10);
+
+			Assert.AreEqual(2, items.Length);
+			Assert.AreEqual(1, items[0].Id);
+		}
+
+		private class TestItem
+		{
+			public int Id { get; set; }
+			public string? Firstname { get; set; }
+			public string? Lastname { get; set; }
+			public int Total { get; set; }
+			public DateTime? Created { get; set; }
 		}
 	}
 }

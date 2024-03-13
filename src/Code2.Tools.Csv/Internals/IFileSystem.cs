@@ -2,8 +2,8 @@
 
 namespace Code2.Tools.Csv.Internals
 {
-    internal interface IFileSystem
-    {
-        StreamReader FileOpenText(string path);
-    }
+	internal interface IFileSystem
+	{
+		StreamReader FileOpenText(string path);
+	}
 }
