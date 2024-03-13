@@ -1,12 +1,15 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace Code2.Tools.Csv.Tests.Assets
+namespace Code2.Tools.CsvTests
 {
-	internal class CsvService
+	public class CsvUtil
 	{
-		public StreamReader GetStreamReader(IEnumerable<string> lines)
+		public static StreamReader GetReaderFromLines(string[] lines)
 		{
 			MemoryStream ms = new MemoryStream();
 			StreamWriter writer = new StreamWriter(ms);
