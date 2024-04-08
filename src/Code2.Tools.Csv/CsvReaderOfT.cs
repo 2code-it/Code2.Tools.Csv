@@ -21,6 +21,7 @@ namespace Code2.Tools.Csv
 
 		private PropertyInfo?[]? _properties;
 
+		public event EventHandler<UnhandledExceptionEventArgs>? Error;
 		public Func<string[], int, T> Deserializer { get; set; }
 
 		public T[] ReadObjects(int amount)
@@ -90,7 +91,7 @@ namespace Code2.Tools.Csv
 			}
 			if (errorMessage is not null)
 			{
-				throw new InvalidOperationException($"Error setting value for {property.Name}, csv line number {lineNumber}, reason:{errorMessage}");
+				OnError($"Error setting value for {property.Name}, csv line number {lineNumber}, reason:{errorMessage}");
 			}
 
 			property.SetValue(instance, value);
@@ -104,10 +105,17 @@ namespace Code2.Tools.Csv
 				_properties = Options.Header is null ?
 				properties :
 					Options.Header.Select(x => x.ToLower()).Select(x => x == string.Empty ? null :
-						properties.FirstOrDefault(p => new[] { x, x.Replace("_", "") }.Contains(p.Name.ToLower()))
+						properties.FirstOrDefault(p => new[] { x, x.Replace("_", "") }.Contains(p.Name, StringComparer.InvariantCultureIgnoreCase))
 					).ToArray();
 			}
 			return _properties;
+		}
+
+		private void OnError(string errorMessage)
+		{
+			InvalidOperationException exception = new InvalidOperationException(errorMessage);
+			if (Error is null) throw exception;
+			Error.Invoke(this, new UnhandledExceptionEventArgs(exception, false));
 		}
 	}
 }
