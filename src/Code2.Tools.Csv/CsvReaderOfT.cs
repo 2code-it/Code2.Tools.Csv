@@ -53,6 +53,8 @@ namespace Code2.Tools.Csv
 
 		private void SetValueOrThrow(PropertyInfo property, string cellValue, object instance, int lineNumber)
 		{
+			if (Options.IgnoreEmptyWhenDeserializing && cellValue == string.Empty) return;
+
 			Type type = property.PropertyType;
 			Type? innerType = Nullable.GetUnderlyingType(type);
 			bool isNullable = innerType is not null;

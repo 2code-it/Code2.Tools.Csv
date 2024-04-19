@@ -7,5 +7,6 @@
 		public bool KeepEnclosureQuotes { get; set; }
 		public bool Explicit { get; set; }
 		public string? DateFormat { get; set; }
+		public bool IgnoreEmptyWhenDeserializing { get; set; }
 	}
 }
