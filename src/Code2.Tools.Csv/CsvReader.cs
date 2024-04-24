@@ -2,25 +2,24 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 namespace Code2.Tools.Csv
 {
 	public class CsvReader : ICsvReader
 	{
-		public CsvReader(string filePath) : this(filePath, new CsvReaderOptions(), new FileSystem()) { }
-		public CsvReader(string filePath, CsvReaderOptions options) : this(filePath, options, new FileSystem()) { }
-		internal CsvReader(string filePath, CsvReaderOptions options, IFileSystem fileSystem) : this(fileSystem.FileOpenText(filePath), options, true) { }
-		public CsvReader(TextReader reader) : this(reader, new CsvReaderOptions()) { }
-		public CsvReader(TextReader reader, CsvReaderOptions options, bool disposeReader = false)
+		public CsvReader(string filePath, CsvReaderOptions? options = null) : this(filePath, options, new FileSystem()) { }
+		internal CsvReader(string filePath, CsvReaderOptions? options, IFileSystem fileSystem) : this(fileSystem.FileOpenText(filePath), options, true) { }
+		public CsvReader(TextReader reader, CsvReaderOptions? options = null, bool disposeReader = false)
 		{
 			_reader = reader;
-			_options = options;
 			_disposeReader = disposeReader;
+			CopyOptionProperties(options, _options);
 		}
 
 		private readonly TextReader _reader;
-		private readonly CsvReaderOptions _options;
+		private readonly CsvReaderOptions _options = new CsvReaderOptions();
 
 
 		private readonly List<string> _line = new List<string>();
@@ -110,6 +109,16 @@ namespace Code2.Tools.Csv
 			if (_disposeReader)
 			{
 				_reader.Dispose();
+			}
+		}
+
+		private void CopyOptionProperties(CsvReaderOptions? source, CsvReaderOptions target)
+		{
+			if (source is null) return;
+			var properties = typeof(CsvReaderOptions).GetProperties().Where(x => x.CanWrite);
+			foreach (var property in properties)
+			{
+				property.SetValue(target, property.GetValue(source));
 			}
 		}
 	}

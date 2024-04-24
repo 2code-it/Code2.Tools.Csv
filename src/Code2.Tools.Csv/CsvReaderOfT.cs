@@ -10,11 +10,10 @@ namespace Code2.Tools.Csv
 	public class CsvReader<T> : CsvReader, ICsvReader<T>
 		where T : class, new()
 	{
-		public CsvReader(string filePath) : this(filePath, new CsvReaderOptions(), new FileSystem()) { }
-		public CsvReader(string filePath, CsvReaderOptions options) : this(filePath, options, new FileSystem()) { }
-		internal CsvReader(string filePath, CsvReaderOptions options, IFileSystem fileSystem) : this(fileSystem.FileOpenText(filePath), options, disposeReader: true) { }
+		public CsvReader(string filePath, CsvReaderOptions? options = null) : this(filePath, options, new FileSystem()) { }
+		internal CsvReader(string filePath, CsvReaderOptions? options, IFileSystem fileSystem) : this(fileSystem.FileOpenText(filePath), options, disposeReader: true) { }
 		public CsvReader(TextReader reader) : this(reader, new CsvReaderOptions()) { }
-		public CsvReader(TextReader reader, CsvReaderOptions options, bool disposeReader = false) : base(reader, options, disposeReader)
+		public CsvReader(TextReader reader, CsvReaderOptions? options = null, bool disposeReader = false) : base(reader, options, disposeReader)
 		{
 			Deserializer = DefaultDeserializer;
 		}
