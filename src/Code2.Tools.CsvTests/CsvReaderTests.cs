@@ -127,6 +127,20 @@ namespace Code2.Tools.Csv.Tests
 			string[] line = csvReader.ReadLine()!;
 		}
 
+		[TestMethod]
+		public void ReadLine_When_OptionsHasHeaderRowSet_Expect_HeaderOptionSet()
+		{
+			string[] lines = new[] { "first,second,third,fourth", "1,2,3,4" };
+			using StreamReader reader = CsvUtil.GetReaderFromLines(lines);
+			CsvReader csvReader = new CsvReader(reader);
+			csvReader.Options.HasHeaderRow = true;
+
+			string[] line = csvReader.ReadLine()!;
+
+			Assert.AreEqual("second", csvReader.Options.Header?[1]);
+			Assert.AreEqual("3", line[2]);
+		}
+
 
 	}
 }

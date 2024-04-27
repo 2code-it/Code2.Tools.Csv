@@ -120,6 +120,24 @@ namespace Code2.Tools.Csv.Tests
 			Assert.AreEqual(1, items[0].Id);
 		}
 
+		[TestMethod]
+		public void ReadObject_When_IgnoreEmptyOptionSet_Expect_EmptyCellsIgnored()
+		{
+			string[] lines = new[]
+			{
+				"1,first1,,20,20010101T00:00:00",
+				"2,first1,last2,,20000102T23:00:00",
+			};
+			using StreamReader reader = CsvUtil.GetReaderFromLines(lines);
+			CsvReaderOptions options = new CsvReaderOptions { DateFormat = "yyyyMMddTHH:mm:ss", IgnoreEmptyWhenDeserializing = true };
+			CsvReader<TestItem> csvReader = new CsvReader<TestItem>(reader, options);
+
+			var items = csvReader.ReadObjects(10);
+
+			Assert.IsNull(items[0].Lastname);
+			Assert.AreEqual(0, items[1].Total);
+		}
+
 		private class TestItem
 		{
 			public int Id { get; set; }

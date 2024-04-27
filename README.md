@@ -3,9 +3,11 @@ Csv Reader / deserializer tools
 
 ## options
  - **Header**, array of strings with header names, default is null
+ - **HasHeaderRow**, indicates that the first row is a header and becomes the Header option not set, default is false
  - **Delimiter**, cell delimiter char, default is ',';
  - **KeepEnclosureQuotes**, indicates whether to keep cell enclosure quotes, default is false
  - **Explicit**, explicit line checking compares header cell count to line cell count, default is false
+ - **IgnoreEmptyWhenDeserializing**, indicates that empty cells should not be used as values when  deserializing, default is false
 
 
 ## example 1: process plaint text

@@ -96,9 +96,14 @@ namespace Code2.Tools.Csv
 			}
 
 			EndOfStream = _reader.Peek() == -1;
-			if (Options.Explicit && Options.Header != null && Options.Header.Length != _line.Count)
+			if (Options.Explicit && Options.Header is not null && Options.Header.Length != _line.Count)
 			{
 				throw new InvalidOperationException($"Header mismatch line: {CurrentLineNumber}");
+			}
+			if(CurrentLineNumber == 1 && Options.HasHeaderRow)
+			{
+				Options.Header ??= _line.ToArray();
+				return ReadLine();
 			}
 			return _line.Count == 0 ? null : _line.ToArray();
 		}
